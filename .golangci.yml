@@ -1,0 +1,103 @@
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+  modules-download-mode: readonly
+
+output:
+  formats:
+    - format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters-settings:
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: github.com/githonllc/arbiterid
+  govet:
+    enable:
+      - shadow
+      - fieldalignment
+  misspell:
+    locale: US
+  lll:
+    line-length: 120
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  gosec:
+    excludes:
+      - G115 # Integer overflow conversion - we handle this explicitly
+  funlen:
+    lines: 50
+    statements: 50
+
+linters:
+  enable:
+    - bodyclose
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - exhaustive
+    - funlen
+    - goconst
+    - gocritic
+    - gofmt
+    - goimports
+    - revive  # replaces golint
+    - mnd     # replaces gomnd
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - copyloopvar  # replaces exportloopref
+    - misspell
+    - nakedret
+    - noctx
+    - nolintlint
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused  # replaces deadcode, structcheck, varcheck
+    - whitespace
+
+issues:
+  uniq-by-line: true
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+        - funlen
+        - dupl
+    # Exclude line length for long error messages
+    - linters:
+        - lll
+      source: "log.Printf.*ArbiterID"
+    # Allow magic numbers for encoding constants and time conversion
+    - linters:
+        - mnd
+      source: "1000|13|11|32|58|0xFF|8|10" # Constants for time conversion, buffer sizes, bases
+    # Allow longer function for main ID generation logic
+    - linters:
+        - funlen
+      source: "GenerateWithTimestamp" # Core generation function with complex logic
+    # Allow if-else chain for clock warning logic (more readable than switch)
+    - linters:
+        - gocritic
+      source: "clockWarningCount"
+    # Allow current field alignment for Node struct (readability over micro-optimization)
+    - linters:
+        - govet
+      source: "type Node struct"
+
+  exclude:
+    # errcheck: Almost all programs ignore errors on these functions and in most cases it's ok
+    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked
