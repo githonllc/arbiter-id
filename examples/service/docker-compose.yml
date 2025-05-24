@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Load balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - arbiterid-0
+      - arbiterid-1
+      - arbiterid-2
+      - arbiterid-3
+    restart: unless-stopped
+
+  # ArbiterID service instance - Node 0
+  arbiterid-0:
+    build: .
+    environment:
+      - NODE_ID=0
+      - PORT=8080
+    expose:
+      - "8080"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ArbiterID service instance - Node 1
+  arbiterid-1:
+    build: .
+    environment:
+      - NODE_ID=1
+      - PORT=8080
+    expose:
+      - "8080"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ArbiterID service instance - Node 2
+  arbiterid-2:
+    build: .
+    environment:
+      - NODE_ID=2
+      - PORT=8080
+    expose:
+      - "8080"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ArbiterID service instance - Node 3
+  arbiterid-3:
+    build: .
+    environment:
+      - NODE_ID=3
+      - PORT=8080
+    expose:
+      - "8080"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    driver: bridge
